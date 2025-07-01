@@ -39,7 +39,7 @@ void calculate_rdf(System& sys, Settings& settings)
     */
 
     double dx, dy, dz, dAB;
-    double dr = (settings.r_max - settings.r_min)/settings.bins;
+    double dr = (settings.r_max - settings.r_min) / settings.bins;
     double* g = new double[settings.bins];
     double* incre_g = new double[settings.bins * settings.increment];
     double* minAB = new double[settings.increment];
@@ -47,22 +47,22 @@ void calculate_rdf(System& sys, Settings& settings)
     int numA{0}, numB{0};
     std::vector<std::pair<int, int>> couples{
         calculate_couples(sys, settings.atom1, settings.atom2, numA, numB)};
-    double factor = numB*numA*4*PI*dr;
+    double factor = numB * numA * 4 * PI * dr;
 
-    for(int i{0}; i < settings.bins; i++)
+    for(int i = 0; i < settings.bins; i++)
         g[i] = 0;
 
 
-    for(int i{0}; i < settings.bins * settings.increment; i++)
+    for(int i = 0; i < settings.bins * settings.increment; i++)
         incre_g[i] = 0;
 
 
     if(settings.NVT)
     {
-            sys.UpdateNVTBox(settings);
+        sys.UpdateNVTBox(settings);
     }
 
-    for(int frame{0}; frame < sys.nframes; frame++) 
+    for(int frame = 0; frame < sys.nframes; frame++) 
     {
         
         if(!settings.NVT)
@@ -75,21 +75,21 @@ void calculate_rdf(System& sys, Settings& settings)
 
         for(std::pair<int, int> &couple : couples) 
         {
-            dx = sys.coords[frame*sys.natoms*3 + couple.first*3]
-                 - sys.coords[frame*sys.natoms*3 + couple.second*3];
-            dy = sys.coords[frame*sys.natoms*3 + couple.first*3 + 1]
-                 - sys.coords[frame*sys.natoms*3 + couple.second*3 + 1];
-            dz = sys.coords[frame*sys.natoms*3 + couple.first*3 + 2]
-                 - sys.coords[frame*sys.natoms*3 + couple.second*3 + 2];
+            dx = sys.coords[frame*sys.natoms * 3 + couple.first * 3]
+                 - sys.coords[frame*sys.natoms * 3 + couple.second * 3];
+            dy = sys.coords[frame*sys.natoms * 3 + couple.first * 3 + 1]
+                 - sys.coords[frame*sys.natoms * 3 + couple.second * 3 + 1];
+            dz = sys.coords[frame*sys.natoms * 3 + couple.first * 3 + 2]
+                 - sys.coords[frame*sys.natoms * 3 + couple.second * 3 + 2];
 
             PBCTriclinic(dx, dy, dz, sys);
 
-            dAB = sqrt(dx*dx + dy*dy + dz*dz);
+            dAB = sqrt(dx * dx + dy * dy + dz * dz);
 
             // check if should include this distance in RDF
             if(dAB < settings.r_max && dAB > settings.r_min) 
             {
-                int layer = static_cast<int>((dAB-settings.r_min)/dr);
+                int layer = static_cast<int>((dAB - settings.r_min) / dr);
                 g[layer] += sys.boxvol; 
             }
 
@@ -131,16 +131,16 @@ void calculate_rdf(System& sys, Settings& settings)
                 else
                 {
                     // if changed atom1, load sorted minAB array to incre_g
-                    std::sort(minAB, minAB+settings.increment);
-                    for(int i{0}; i<settings.increment; i++)
+                    std::sort(minAB, minAB + settings.increment);
+                    for(int i = 0; i < settings.increment; i++)
                     {
                         int layer = static_cast<int>((minAB[i]
-                                                     -settings.r_min)/dr);
-                        incre_g[layer+i*settings.bins] += sys.boxvol; 
+                                                     -settings.r_min) / dr);
+                        incre_g[layer + i*settings.bins] += sys.boxvol; 
                     }
 
                     // zero the temp minAB array
-                    for(int i{0}; i < settings.increment; i++)
+                    for(int i = 0; i < settings.increment; i++)
                     {
                         minAB[i] = 0;
                     }
@@ -151,16 +151,16 @@ void calculate_rdf(System& sys, Settings& settings)
         }
 
         //load the last sorted minAB to incre_g
-        std::sort(minAB, minAB+settings.increment);
-        for(int i{0}; i<settings.increment; i++)
+        std::sort(minAB, minAB + settings.increment);
+        for(int i = 0; i < settings.increment; i++)
         {
-            int layer = static_cast<int>((minAB[i]-settings.r_min)/dr);
-            incre_g[layer+i*settings.bins] += sys.boxvol; 
+            int layer = static_cast<int>((minAB[i] - settings.r_min) / dr);
+            incre_g[layer + i*settings.bins] += sys.boxvol; 
 
         }
        
         // zero the temp minAB array
-        for(int i{0}; i < settings.increment; i++)
+        for(int i = 0; i < settings.increment; i++)
         {
             minAB[i] = 0;
         }
@@ -172,19 +172,19 @@ void calculate_rdf(System& sys, Settings& settings)
     rdffile.open(settings.outfile);
     rdffile << settings.bins << "  " << settings.atom1 << "  " << settings.atom2 << "\n";
     rdffile << "distance:\tRDF value:\n";
-    for(int i{0}; i < settings.bins; i++) 
+    for(int i = 0; i < settings.bins; i++) 
     {
         //final calculation
-        double r = settings.r_min + i*dr;
+        double r = settings.r_min + i * dr;
         if(i != 0) 
         {
-            g[i] = g[i]/(factor*sys.nframes*r*r);
+            g[i] = g[i] / (factor * sys.nframes * r * r);
         }
         else
         {
             g[i] = 0;   // set the rdf for 0 radius as 0;
         }
-        rdffile << std::fixed << std::setprecision(5) << settings.r_min+i*dr << "\t"
+        rdffile << std::fixed << std::setprecision(5) << settings.r_min + i * dr << "\t"
                 << std::fixed << std::setprecision(8) << g[i] << "\n";
     }
     rdffile.close();
@@ -197,24 +197,24 @@ void calculate_rdf(System& sys, Settings& settings)
         std::ofstream irdffile;
         irdffile.open(settings.increfile);
         irdffile << settings.bins << "  " << settings.atom1 << "  " << settings.atom2 << "\n";
-        for(int i{0}; i < settings.increment; i++) 
+        for(int i = 0; i < settings.increment; i++) 
         {
             irdffile << "iRDF: " << i << "\n";
             irdffile << "distance:\tRDF value:\n";
-            for(int j{0}; j < settings.bins; j++) 
+            for(int j = 0; j < settings.bins; j++) 
             {
-                double r = settings.r_min + j*dr;
+                double r = settings.r_min + j * dr;
                 if(j != 0) 
                 {
-                    incre_g[j+i*settings.bins] = incre_g[j+i*settings.bins]
-                                                      /(factor*sys.nframes*r*r);
+                    incre_g[j + i * settings.bins] = incre_g[j + i * settings.bins]
+                                                      / (factor * sys.nframes * r * r);
                 }
                 else
                 {
-                    incre_g[j+i*settings.bins] = 0;   // set the rdf for 0 radius as 0;
+                    incre_g[j + i * settings.bins] = 0;   // set the rdf for 0 radius as 0;
                 }
-                irdffile << std::fixed << std::setprecision(5) << settings.r_min+j*dr << "\t"
-                         << std::fixed << std::setprecision(8) << incre_g[j+i*settings.bins] << "\n";
+                irdffile << std::fixed << std::setprecision(5) << settings.r_min + j * dr << "\t"
+                         << std::fixed << std::setprecision(8) << incre_g[j + i * settings.bins] << "\n";
             }
             irdffile << "\n";
         }

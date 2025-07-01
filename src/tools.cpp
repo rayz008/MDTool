@@ -10,7 +10,7 @@ std::vector<std::pair<int, int>> calculate_couples(
 {
     std::vector<std::pair<int, int>> vec;
 
-    for(int a{0}; a < sys.natoms; a++) 
+    for(int a = 0; a < sys.natoms; a++) 
     {
         if(sys.atoms[a] == atomA) 
         {
@@ -29,11 +29,11 @@ std::vector<std::pair<int, int>> calculate_couples(
 
     vec.reserve(numA * numB);
     // reduce
-    for(int a{0}; a < sys.natoms; a++) 
+    for(int a = 0; a < sys.natoms; a++) 
     {
         if(sys.atoms[a] == atomA) 
         {
-            for(int b{0}; b < sys.natoms; b++) 
+            for(int b = 0; b < sys.natoms; b++) 
             {
                 if(sys.atoms[b] == atomB) 
                 {

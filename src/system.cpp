@@ -20,8 +20,8 @@ System::~System()
 void System::AllocateMemory()
 {
     atoms = new std::string[natoms];
-    coords = new double[nframes*natoms*3];
-    box = new double[nframes*6];
+    coords = new double[nframes * natoms * 3];
+    box = new double[nframes * 6];
     boxmat = new double[9];
     boxinv = new double[9];
 
@@ -56,7 +56,7 @@ void System::ReadXYZ(const std::string &filename)
         {
             nframes++;
         }
-        nframes /= (natoms+2);
+        nframes /= (natoms + 2);
         file.clear();
         file.seekg(0);
 
@@ -65,7 +65,7 @@ void System::ReadXYZ(const std::string &filename)
         AllocateMemory();
 
 
-        for(int i=0; i < nframes; i++) 
+        for(int i = 0; i < nframes; i++) 
         {
             getline(file, line);
             
@@ -73,27 +73,27 @@ void System::ReadXYZ(const std::string &filename)
             getline(file, line);
             if(line.size() != 0)
             {
-                line = line.substr(line.find("CELL(abcABC):")+13, line.find("Step:")-line.find("CELL(abcABC):")-13);
+                line = line.substr(line.find("CELL(abcABC):") + 13, line.find("Step:") - line.find("CELL(abcABC):") - 13);
                 iss.clear();
                 iss.str(line);
                 double box_tmp;
-                int k=0;
+                int k = 0;
                 while(iss >> box_tmp){
-                    box[6*i+k] = box_tmp;
+                    box[6 * i + k] = box_tmp;
                     k++;
                 }
             }
            
-            for(int j=0; j < natoms; j++) 
+            for(int j = 0; j < natoms; j++) 
             {
                 // write in atomtypes and coords
                 getline(file, line);
                 iss.clear();
                 iss.str(line);
                 iss >> atoms[j]
-                    >> coords[i*natoms*3 + j*3]
-                    >> coords[i*natoms*3 + j*3 + 1]
-                    >> coords[i*natoms*3 + j*3 + 2];
+                    >> coords[i * natoms * 3 + j * 3]
+                    >> coords[i * natoms * 3 + j * 3 + 1]
+                    >> coords[i * natoms * 3 + j * 3 + 2];
             }
         }
 
@@ -112,11 +112,11 @@ void System::UpdateBoxInv()
 {
     for(int i = 0; i < 3; i++) {
          for(int j = 0; j < 3; j++){
-             boxinv[i*3+j] = ((boxmat[3*((j + 1)%3) + (i + 1)%3] *
-                               boxmat[3*((j + 2)%3) + (i + 2)%3]) -
-                              (boxmat[3*((j + 1)%3) + (i + 2)%3] *
-                               boxmat[3*((j + 2)%3) + (i + 1)%3])) 
-                              /boxvol;
+             boxinv[i * 3 + j] = ((boxmat[3 * ((j + 1) % 3) + (i + 1) % 3]  * 
+                                   boxmat[3 * ((j + 2) % 3) + (i + 2) % 3]) -
+                                  (boxmat[3 * ((j + 1) % 3) + (i + 2) % 3]  *
+                                   boxmat[3 * ((j + 2) % 3) + (i + 1) % 3])) 
+                                  / boxvol;
          }
     }
 
@@ -127,26 +127,26 @@ void System::UpdateNPTBox(int nframe)
 {
     double PI = 3.141592653589793238L;
     //update box matrix
-    boxmat[0] = box[6*nframe];
-    boxmat[1] = box[6*nframe+1]*cos(box[6*nframe+5]*PI/180);
-    boxmat[2] = box[6*nframe+2]*cos(box[6*nframe+4]*PI/180);
+    boxmat[0] = box[6 * nframe];
+    boxmat[1] = box[6 * nframe + 1]*cos(box[6 * nframe + 5] * PI / 180);
+    boxmat[2] = box[6 * nframe + 2]*cos(box[6 * nframe + 4] * PI / 180);
     boxmat[3] = 0;
-    boxmat[4] = box[6*nframe+1]*sin(box[6*nframe+5]*PI/180);
-    boxmat[5] = ( box[6*nframe+1] * box[6*nframe+2] * cos(box[6*nframe+3]*PI/180)
-                - boxmat[1] * boxmat[2])/boxmat[4];
+    boxmat[4] = box[6 * nframe + 1]*sin(box[6 * nframe + 5] * PI / 180);
+    boxmat[5] = (box[6 * nframe + 1] * box[6 * nframe + 2] * cos(box[6 * nframe + 3] * PI / 180)
+                - boxmat[1] * boxmat[2]) / boxmat[4];
     boxmat[6] = 0;
     boxmat[7] = 0;
-    boxmat[8] = sqrt(box[6*nframe+2]*box[6*nframe+2] 
-                  - boxmat[2]*boxmat[2] 
-                  - boxmat[5]*boxmat[5]);
+    boxmat[8] = sqrt(box[6 * nframe + 2]*box[6 * nframe + 2] 
+                  - boxmat[2] * boxmat[2] 
+                  - boxmat[5] * boxmat[5]);
 
     //update box volume
     boxvol = 0;
-    for(int i{0}; i < 3; i++) 
+    for(int i = 0; i < 3; i++) 
     {
         boxvol += boxmat[i] *
-                    (boxmat[3+(i+1)%3] * boxmat[6+(i+2)%3] -
-                     boxmat[3+(i+2)%3] * boxmat[6+(i+1)%3]);
+                    (boxmat[3 + (i + 1) % 3] * boxmat[6 + (i + 2) % 3] -
+                     boxmat[3 + (i + 2) % 3] * boxmat[6 + (i + 1) % 3]);
     }
 
     if(boxvol == 0) 
@@ -188,11 +188,11 @@ void System::UpdateNVTBox(Settings& settings)
     
     //update box volume
     boxvol = 0;
-    for(int i{0}; i < 3; i++) 
+    for(int i = 0; i < 3; i++) 
     {
         boxvol += boxmat[i] *
-                    (boxmat[3+(i+1)%3] * boxmat[6+(i+2)%3] -
-                     boxmat[3+(i+2)%3] * boxmat[6+(i+1)%3]);
+                    (boxmat[3 + (i + 1) % 3] * boxmat[6 + (i + 2) % 3] -
+                     boxmat[3 + (i + 2) % 3] * boxmat[6 + (i + 1) % 3]);
     }
     
     if(boxvol == 0) 
