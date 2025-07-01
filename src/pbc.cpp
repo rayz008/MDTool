@@ -22,7 +22,8 @@ void PBCTriclinic(
     System& sys)
 {
     double ds[3]={0, 0, 0};
-    for(int i{0}; i < 3; i++) {
+    for(int i{0}; i < 3; i++) 
+    {
         ds[i] = rint(sys.boxinv[i*3]*dx
                    + sys.boxinv[i*3 + 1]*dy
                    + sys.boxinv[i*3 + 2]*dz);

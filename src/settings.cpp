@@ -27,7 +27,9 @@ void Settings::ReadSettings(const char* filename)
                 iss.ignore(256, ' ');
                 iss.ignore(256, ' ');
             };
-            if(line == "[Files]"){
+
+            if(line == "[Files]")
+            {
                 // ADD FUNCTION THAT DOES THIS
                 SkipArgs();
                 iss >> infile;
@@ -35,8 +37,9 @@ void Settings::ReadSettings(const char* filename)
                 iss >> outfile;
                 SkipArgs();
                 iss >> increfile;
-            }
-            else if (line == "[System]"){
+            } 
+            else if (line == "[System]")
+            {
                 SkipArgs();
                 iss >> atom1;
                 SkipArgs();
@@ -46,8 +49,9 @@ void Settings::ReadSettings(const char* filename)
                 if(line.size() != 0){
                     NVT = true;
                 }
-            }
-            else if (line == "[Settings]"){
+            } 
+            else if (line == "[Settings]")
+            {
                 SkipArgs();
                 iss >> r_min;
                 SkipArgs();
@@ -58,8 +62,12 @@ void Settings::ReadSettings(const char* filename)
                 iss >> increment;
             }
         }
+
         file.close();
-    } else {
+
+    } 
+    else 
+    {
         throw std::logic_error("Unexpected file format for settings.");
     }
 

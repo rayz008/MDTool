@@ -30,7 +30,8 @@ void System::AllocateMemory()
 }
 
 
-void System::ReadXYZ(const std::string &filename) {
+void System::ReadXYZ(const std::string &filename) 
+{
 
     if(atoms || coords)
     {
@@ -51,7 +52,8 @@ void System::ReadXYZ(const std::string &filename) {
 
         //get number of frames
         nframes++;
-        while(getline(file, line)) {
+        while(getline(file, line)) 
+        {
             nframes++;
         }
         nframes /= (natoms+2);
@@ -63,12 +65,14 @@ void System::ReadXYZ(const std::string &filename) {
         AllocateMemory();
 
 
-        for(int i=0; i < nframes; i++) {
+        for(int i=0; i < nframes; i++) 
+        {
             getline(file, line);
             
             // get box information
             getline(file, line);
-            if(line.size() != 0){
+            if(line.size() != 0)
+            {
                 line = line.substr(line.find("CELL(abcABC):")+13, line.find("Step:")-line.find("CELL(abcABC):")-13);
                 iss.clear();
                 iss.str(line);
@@ -80,7 +84,8 @@ void System::ReadXYZ(const std::string &filename) {
                 }
             }
            
-            for(int j=0; j < natoms; j++) {
+            for(int j=0; j < natoms; j++) 
+            {
                 // write in atomtypes and coords
                 getline(file, line);
                 iss.clear();
@@ -92,16 +97,19 @@ void System::ReadXYZ(const std::string &filename) {
             }
         }
 
-
         file.close();
-    } else {
+
+    } 
+    else 
+    {
         throw std::logic_error("Unexpected file format.");
     }
  
     return;
 }
 
-void System::UpdateBoxInv(){
+void System::UpdateBoxInv()
+{
     for(int i = 0; i < 3; i++) {
          for(int j = 0; j < 3; j++){
              boxinv[i*3+j] = ((boxmat[3*((j + 1)%3) + (i + 1)%3] *
@@ -115,7 +123,8 @@ void System::UpdateBoxInv(){
     return;
 }
 
-void System::UpdateNPTBox(int nframe){
+void System::UpdateNPTBox(int nframe)
+{
     double PI = 3.141592653589793238L;
     //update box matrix
     boxmat[0] = box[6*nframe];
@@ -133,12 +142,15 @@ void System::UpdateNPTBox(int nframe){
 
     //update box volume
     boxvol = 0;
-    for(int i{0}; i < 3; i++) {
+    for(int i{0}; i < 3; i++) 
+    {
         boxvol += boxmat[i] *
                     (boxmat[3+(i+1)%3] * boxmat[6+(i+2)%3] -
                      boxmat[3+(i+2)%3] * boxmat[6+(i+1)%3]);
     }
-    if(boxvol == 0) {
+
+    if(boxvol == 0) 
+    {
         throw std::logic_error(
             "Determinant for NPT inputting box is 0, more dimension required!");
     }
@@ -151,7 +163,8 @@ void System::UpdateNPTBox(int nframe){
 
 // add options to read with Cell abcABC
 // detects NPT and NVT by the comment line specified in the xyz trajectory
-void System::UpdateNVTBox(Settings& settings){
+void System::UpdateNVTBox(Settings& settings)
+{
     std::string line;
     line = settings.box;
 
@@ -167,19 +180,23 @@ void System::UpdateNVTBox(Settings& settings){
     int i{0};
     double box_tmp;
     // box formated like box = [[xa xb xc] [ya yb yc] [za zb zc]] for a b c as the three edges
-    while(iss >> box_tmp) {
+    while(iss >> box_tmp) 
+    {
         boxmat[i] = box_tmp;
         i++;
     }
     
     //update box volume
     boxvol = 0;
-    for(int i{0}; i < 3; i++) {
+    for(int i{0}; i < 3; i++) 
+    {
         boxvol += boxmat[i] *
                     (boxmat[3+(i+1)%3] * boxmat[6+(i+2)%3] -
                      boxmat[3+(i+2)%3] * boxmat[6+(i+1)%3]);
     }
-    if(boxvol == 0) {
+    
+    if(boxvol == 0) 
+    {
         throw std::logic_error(
             "Determinant for NVT inputting box is 0, more dimension required!");
     }
