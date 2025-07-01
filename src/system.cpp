@@ -42,7 +42,6 @@ void System::ReadXYZ(const std::string &filename) {
     if(file.is_open())
     {
         std::string line;
-        //line.reserve(100);
         //get number of atoms
         std::getline(file, line);
         std::istringstream iss;
@@ -63,52 +62,7 @@ void System::ReadXYZ(const std::string &filename) {
         // box array = [a1, b1, c1, A1, B1, C1, a2, b2, c2, ...]
         AllocateMemory();
 
-        /* 
-        std::vector<std::istringstream> issarr;
-        issarr.reserve(natoms + 1);
 
-        for(int i=0; i < nframes; i++) {
-            getline(file, line);
-            getline(file, line);
-            line = line.substr(line.find("CELL(abcABC):")+13, line.find("Step:")-line.find("CELL(abcABC):")-13);
-            iss.clear();
-            iss.str(line);
-            issarr.push_back(iss);
-            
-            auto thebox = [&]{
-                double box_tmp;
-                int k=0;
-                while(issarr[0] >> box_tmp){
-                    box[6*i+k] = box_tmp;
-                    k++;
-                }
-            };
-
-            std::thread mythread1(thebox);
-            //mythread1.join();
-
-
-            for(int j=0; j < natoms; j++) {
-                getline(file, line);
-                iss.clear();
-                iss.str(line);
-                issarr.push_back(iss);
-
-                auto thecoords = [&]{
-                    issarr[j+1] >> atoms[j]
-                                >> coords[i*natoms*3 + j*3]
-                                >> coords[i*natoms*3 + j*3 + 1]
-                                >> coords[i*natoms*3 + j*3 + 2];
-                };
-
-                std::thread mythread2(thecoords);
-                //mythread2.join();
-
-            }
-        }*/
-        
-
-        
         for(int i=0; i < nframes; i++) {
             getline(file, line);
             

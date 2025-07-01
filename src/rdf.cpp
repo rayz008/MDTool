@@ -1,13 +1,9 @@
 // Radial Distribution Functions
-//#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <stdexcept>
-//#include <string>
 #include <math.h>
-//#include <utility>
-//#include <vector>
 #include <algorithm>
 
 #include "settings.h"
