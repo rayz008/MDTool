@@ -17,19 +17,6 @@ constexpr double PI = 3.141592653589793238L;
 
 void calculate_rdf(System& sys, Settings& settings) 
 {
-    // get error message for wrong r_max and r_min;
-    if(settings.r_max <= settings.r_min) 
-    {
-        throw std::logic_error(
-            "Maximum radius is smaller than minimum radius!");
-    }
-
-    if(settings.bins <= 0) 
-    {
-        throw std::logic_error(
-            "Bin number must be larger than 0!");
-    }
-
     /*
     if(std::none_of(sys.atoms, sys.atoms + sys.natoms,
         [&](std::string str) {return (str == atomA || str == atomB);})) {
@@ -46,7 +33,7 @@ void calculate_rdf(System& sys, Settings& settings)
 
     int numA{0}, numB{0};
     std::vector<std::pair<int, int>> couples{
-        calculate_couples(sys, settings.atom1, settings.atom2, numA, numB)};
+        countPairs(sys, settings.atom1, settings.atom2, numA, numB)};
     double factor = numB * numA * 4 * PI * dr;
 
     for(int i = 0; i < settings.bins; i++)
@@ -57,18 +44,9 @@ void calculate_rdf(System& sys, Settings& settings)
         incre_g[i] = 0;
 
 
-    if(settings.NVT)
-    {
-        sys.UpdateNVTBox(settings);
-    }
-
     for(int frame = 0; frame < sys.nframes; frame++) 
     {
-        
-        if(!settings.NVT)
-        {
-            sys.UpdateNPTBox(frame);
-        }
+        sys.updateBoxInformation(frame);
 
         int count = 0;
         int check = couples[0].first;
@@ -82,7 +60,7 @@ void calculate_rdf(System& sys, Settings& settings)
             dz = sys.coords[frame*sys.natoms * 3 + couple.first * 3 + 2]
                  - sys.coords[frame*sys.natoms * 3 + couple.second * 3 + 2];
 
-            PBCTriclinic(dx, dy, dz, sys);
+            pbcTriclinic(dx, dy, dz, sys);
 
             dAB = sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -90,7 +68,7 @@ void calculate_rdf(System& sys, Settings& settings)
             if(dAB < settings.r_max && dAB > settings.r_min) 
             {
                 int layer = static_cast<int>((dAB - settings.r_min) / dr);
-                g[layer] += sys.boxvol; 
+                g[layer] += sys.box_volume; 
             }
 
             // check and include distance in minAB array for i-RDF
@@ -136,7 +114,7 @@ void calculate_rdf(System& sys, Settings& settings)
                     {
                         int layer = static_cast<int>((minAB[i]
                                                      -settings.r_min) / dr);
-                        incre_g[layer + i*settings.bins] += sys.boxvol; 
+                        incre_g[layer + i*settings.bins] += sys.box_volume; 
                     }
 
                     // zero the temp minAB array
@@ -155,7 +133,7 @@ void calculate_rdf(System& sys, Settings& settings)
         for(int i = 0; i < settings.increment; i++)
         {
             int layer = static_cast<int>((minAB[i] - settings.r_min) / dr);
-            incre_g[layer + i*settings.bins] += sys.boxvol; 
+            incre_g[layer + i*settings.bins] += sys.box_volume; 
 
         }
        
@@ -242,7 +220,7 @@ int main(int argc, char** argv){
     // read and check stored system info
     try 
     {
-        sys.ReadXYZ(settings.infile);
+        sys.readXYZ(settings.infile);
     } 
     catch(const std::bad_alloc &e) 
     {

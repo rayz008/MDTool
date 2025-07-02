@@ -6,15 +6,19 @@
 
 // system stores the information of the atoms and coordinates as an array
 struct System {
+    bool traj_allocated = false;
+    bool box_allocated = false;
+    bool fixed_volume;
+
     int nframes{0};
     int natoms{0};
-    double boxvol{0};
+    double box_volume{0};
     // stores pointers to position of the atom array and the coord array
     std::string* atoms{nullptr};
     double* coords{nullptr};
-    double* box{nullptr};
-    double* boxmat{nullptr};
-    double* boxinv{nullptr};
+    double* boxes{nullptr};
+    double* box_matrix{nullptr};
+    double* box_inverse{nullptr};
     
     System() = default;
     ~System();
@@ -24,11 +28,11 @@ struct System {
     System& operator = (System&& other)      = delete;
 
     //initialize the system with the atom array and the coord array
-    void AllocateMemory();
-    void ReadXYZ(const std::string &filename);
-    void UpdateNPTBox(int frame);
-    void UpdateNVTBox(Settings& setting);
-    void UpdateBoxInv();
+    void allocateMemory();
+    void readXYZ(const std::string &filename);
+    void readBox(const Settings& setting);
+    void updateBoxInverse();
+    void updateBoxInformation(int frame);
 };
 
 #endif

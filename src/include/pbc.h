@@ -3,15 +3,7 @@
 
 #include "settings.h"
 
-void PBCOrthorhombic(
-    double& dx,
-    double& dy,
-    double& dz,
-    System& sys);
-void PBCTriclinic(
-    double& dx,
-    double& dy,
-    double& dz,
-    System& sys);
+void pbcOrthorhombic(double& dx, double& dy, double& dz, System& sys);
+void pbcTriclinic(double& dx, double& dy, double& dz, System& sys);
 
 #endif
