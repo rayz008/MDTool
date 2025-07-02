@@ -33,7 +33,7 @@ void System::allocateBoxMemory() {
     }
 
     if (!traj_allocated) {
-        throw std::runtime_error("Box memory allocated before trajectory memory allocation.")
+        throw std::runtime_error("Box memory allocated before trajectory memory allocation.");
     }
 
     if (fixed_volume) {
@@ -45,7 +45,7 @@ void System::allocateBoxMemory() {
     box_matrix  = new double[9];
     box_inverse = new double[9];
 
-    box_allocated = true;
+    boxes_allocated = true;
 }
 
 void System::readXYZ(const std::string &trajectory_file_name) {
@@ -124,7 +124,7 @@ void System::readBoxFromXYZ(const std::string &trajectory_file_name) {
         std::vector<double> temp_params;
         double value;
 
-        while (iss >> line) {
+        while (iss >> value) {
             temp_params.push_back(value);
         }
 
@@ -178,7 +178,7 @@ void System::readBoxFromXYZ(const std::string &trajectory_file_name) {
         }
     } else {
         if (static_cast<int>(box_data.size()) != nframes) {
-            throw std::logic_error("Box entries not matching trajectory frame numbers")l
+            throw std::logic_error("Box entries not matching trajectory frame numbers");
         }
 
         for (int frame = 0; frame < nframes; frame++) {
@@ -214,7 +214,7 @@ void System::readBoxFromFile(const std::string &box_file_name) {
         std::vector<double> temp_params;
         double value;
 
-        while (iss >> line) {
+        while (iss >> value) {
             temp_params.push_back(value);
         }
 
@@ -265,7 +265,7 @@ void System::readBoxFromFile(const std::string &box_file_name) {
         }
     } else {
         if (static_cast<int>(box_data.size()) != nframes) {
-            throw std::logic_error("Box entries not matching trajectory frame numbers")l
+            throw std::logic_error("Box entries not matching trajectory frame numbers");
         }
 
         for (int frame = 0; frame < nframes; frame++) {

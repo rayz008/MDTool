@@ -1,7 +1,7 @@
 #include <fstream>
 #include <stdexcept>
-#include <nlohmann/json.hpp>
 
+#include "json.hpp"
 #include "settings.h"
 
 /**
@@ -24,7 +24,7 @@ void Settings::readSettings(const char* settingfile) {
     json settingconfig;
     try {
         file >> settingconfig;
-    } catch (const json:parse_error& e) {
+    } catch (const json::parse_error& e) {
         throw std::runtime_error("Failed to parse JSON file: " + std::string(e.what()));
     }
     file.close();
@@ -40,7 +40,7 @@ void Settings::readSettings(const char* settingfile) {
         rdf_outfile = settingconfig.value("rdf_output", std::string("radial.dat"));
         r_min = settingconfig.value("r_min", 0.0);
         r_max = settingconfig.value("r_max", 10.0);
-        bins = settingconfig.value("r_min", 200);
+        bins = settingconfig.value("bins", 200);
         increments = settingconfig.value("increment", 0);
         irdf_outfile = settingconfig.value("irdf_output", std::string(""));
 

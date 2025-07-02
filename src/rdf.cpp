@@ -14,7 +14,6 @@
 
 constexpr double PI = 3.141592653589793238L;
 
-
 void calculate_rdf(System& sys, Settings& settings) 
 {
     /*
