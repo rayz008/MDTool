@@ -27,8 +27,8 @@ void calculate_rdf(System& sys, Settings& settings)
     double dx, dy, dz, dAB;
     double dr = (settings.r_max - settings.r_min) / settings.bins;
     double* g = new double[settings.bins];
-    double* incre_g = new double[settings.bins * settings.increment];
-    double* minAB = new double[settings.increment];
+    double* incre_g = new double[settings.bins * settings.increments];
+    double* minAB = new double[settings.increments];
 
     int numA{0}, numB{0};
     std::vector<std::pair<int, int>> couples{
@@ -39,7 +39,7 @@ void calculate_rdf(System& sys, Settings& settings)
         g[i] = 0;
 
 
-    for(int i = 0; i < settings.bins * settings.increment; i++)
+    for(int i = 0; i < settings.bins * settings.increments; i++)
         incre_g[i] = 0;
 
 
@@ -75,17 +75,17 @@ void calculate_rdf(System& sys, Settings& settings)
             {
                 if(     dAB > settings.r_min
                     &&  dAB < settings.r_max 
-                    &&  count < settings.increment) 
+                    &&  count < settings.increments) 
                 {
                     minAB[count] = dAB;
                     count++;
                 }
                 else if(     dAB > settings.r_min 
                          &&  dAB < settings.r_max
-                         &&  count >= settings.increment)
+                         &&  count >= settings.increments)
                 {
                     int max_index = 0;
-                    for(int k = 1; k < settings.increment; k++)
+                    for(int k = 1; k < settings.increments; k++)
                     {
                         if(minAB[k] > minAB[max_index])
                         {
@@ -99,7 +99,7 @@ void calculate_rdf(System& sys, Settings& settings)
                 }
             };
 
-            if(settings.increment) 
+            if(settings.increments) 
             {
                 if(check == couple.first)
                 {
@@ -108,8 +108,8 @@ void calculate_rdf(System& sys, Settings& settings)
                 else
                 {
                     // if changed atom1, load sorted minAB array to incre_g
-                    std::sort(minAB, minAB + settings.increment);
-                    for(int i = 0; i < settings.increment; i++)
+                    std::sort(minAB, minAB + settings.increments);
+                    for(int i = 0; i < settings.increments; i++)
                     {
                         int layer = static_cast<int>((minAB[i]
                                                      -settings.r_min) / dr);
@@ -117,7 +117,7 @@ void calculate_rdf(System& sys, Settings& settings)
                     }
 
                     // zero the temp minAB array
-                    for(int i = 0; i < settings.increment; i++)
+                    for(int i = 0; i < settings.increments; i++)
                     {
                         minAB[i] = 0;
                     }
@@ -128,8 +128,8 @@ void calculate_rdf(System& sys, Settings& settings)
         }
 
         //load the last sorted minAB to incre_g
-        std::sort(minAB, minAB + settings.increment);
-        for(int i = 0; i < settings.increment; i++)
+        std::sort(minAB, minAB + settings.increments);
+        for(int i = 0; i < settings.increments; i++)
         {
             int layer = static_cast<int>((minAB[i] - settings.r_min) / dr);
             incre_g[layer + i*settings.bins] += sys.box_volume; 
@@ -137,7 +137,7 @@ void calculate_rdf(System& sys, Settings& settings)
         }
        
         // zero the temp minAB array
-        for(int i = 0; i < settings.increment; i++)
+        for(int i = 0; i < settings.increments; i++)
         {
             minAB[i] = 0;
         }
@@ -146,7 +146,7 @@ void calculate_rdf(System& sys, Settings& settings)
 
     // write rdf output file
     std::ofstream rdffile;
-    rdffile.open(settings.outfile);
+    rdffile.open(settings.rdf_outfile);
     rdffile << settings.bins << "  " << settings.atom1 << "  " << settings.atom2 << "\n";
     rdffile << "distance:\tRDF value:\n";
     for(int i = 0; i < settings.bins; i++) 
@@ -169,12 +169,12 @@ void calculate_rdf(System& sys, Settings& settings)
 
 
     // write i-rdf output file
-    if(settings.increfile.size() != 0 && settings.increment) 
+    if(settings.irdf_outfile.size() != 0 && settings.increments) 
     {
         std::ofstream irdffile;
-        irdffile.open(settings.increfile);
+        irdffile.open(settings.irdf_outfile);
         irdffile << settings.bins << "  " << settings.atom1 << "  " << settings.atom2 << "\n";
-        for(int i = 0; i < settings.increment; i++) 
+        for(int i = 0; i < settings.increments; i++) 
         {
             irdffile << "iRDF: " << i << "\n";
             irdffile << "distance:\tRDF value:\n";
@@ -219,7 +219,7 @@ int main(int argc, char** argv){
     // read and check stored system info
     try 
     {
-        sys.readXYZ(settings.infile);
+        sys.readXYZ(settings.traj_infile);
     } 
     catch(const std::bad_alloc &e) 
     {
