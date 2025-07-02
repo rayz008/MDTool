@@ -18,6 +18,7 @@ struct Settings {
     int bins, increments;
 
     void readSettings(const char* filename);
+    void validateSettings() const;
 
     Settings(const char* filename);
     ~Settings() = default;

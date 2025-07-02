@@ -28,7 +28,7 @@ void System::allocateTrajectoryMemory() {
 }
 
 void System::allocateBoxMemory() {
-    if (boxes_allocated) {
+    if (box_allocated) {
         delete[] boxes;
     }
 
@@ -45,7 +45,7 @@ void System::allocateBoxMemory() {
     box_matrix  = new double[9];
     box_inverse = new double[9];
 
-    boxes_allocated = true;
+    box_allocated = true;
 }
 
 void System::readXYZ(const std::string &trajectory_file_name) {
@@ -134,8 +134,8 @@ void System::readBoxFromXYZ(const std::string &trajectory_file_name) {
             } else if (temp_params.size() == 6) {
                 box_format = 6;
             } else {
-                throw std::runtime_error("Box can either take 3 parameters (a, b, c) for orthorhombic box" +
-                        " or 6 parameters (a, b, c, A, B, C) for triclinic box in a line.");
+                throw std::runtime_error(std::string("Box can either take 3 parameters (a, b, c) for orthorhombic box")
+                                        + " or 6 parameters (a, b, c, A, B, C) for triclinic box in a line.");
             }
         } else {
             if (static_cast<int>(temp_params.size()) != box_format) {
@@ -174,7 +174,7 @@ void System::readBoxFromXYZ(const std::string &trajectory_file_name) {
 
     if (fixed_volume) {
         for (int i = 0; i < 6; i++) {
-            box[i] = box_data[0][i];
+            boxes[i] = box_data[0][i];
         }
     } else {
         if (static_cast<int>(box_data.size()) != nframes) {
@@ -183,7 +183,7 @@ void System::readBoxFromXYZ(const std::string &trajectory_file_name) {
 
         for (int frame = 0; frame < nframes; frame++) {
             for (int i = 0; i < 6; i++) {
-                box[frame * 6 + i] = box_data[frame][i];
+                boxes[frame * 6 + i] = box_data[frame][i];
             }
         }
     }
@@ -224,8 +224,8 @@ void System::readBoxFromFile(const std::string &box_file_name) {
             } else if (temp_params.size() == 6) {
                 box_format = 6;
             } else {
-                throw std::runtime_error("Box file can either take 3 parameters (a, b, c) for orthorhombic box" +
-                        " or 6 parameters (a, b, c, A, B, C) for triclinic box in a line.");
+                throw std::runtime_error(std::string("Box can either take 3 parameters (a, b, c) for orthorhombic box")
+                                        + " or 6 parameters (a, b, c, A, B, C) for triclinic box in a line.");
             }
         } else {
             if (static_cast<int>(temp_params.size()) != box_format) {
@@ -261,7 +261,7 @@ void System::readBoxFromFile(const std::string &box_file_name) {
 
     if (fixed_volume) {
         for (int i = 0; i < 6; i++) {
-            box[i] = box_data[0][i];
+            boxes[i] = box_data[0][i];
         }
     } else {
         if (static_cast<int>(box_data.size()) != nframes) {
@@ -270,7 +270,7 @@ void System::readBoxFromFile(const std::string &box_file_name) {
 
         for (int frame = 0; frame < nframes; frame++) {
             for (int i = 0; i < 6; i++) {
-                box[frame * 6 + i] = box_data[frame][i];
+                boxes[frame * 6 + i] = box_data[frame][i];
             }
         }
     }

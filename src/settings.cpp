@@ -4,6 +4,8 @@
 #include "json.hpp"
 #include "settings.h"
 
+using json = nlohmann::json;
+
 /**
  * Settings handles parsing of JSON configuration files 
  *

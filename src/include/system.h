@@ -28,9 +28,11 @@ struct System {
     System& operator = (System&& other)      = delete;
 
     //initialize the system with the atom array and the coord array
-    void allocateMemory();
+    void allocateTrajectoryMemory();
+    void allocateBoxMemory();
     void readXYZ(const std::string &filename);
-    void readBox(const Settings& setting);
+    void readBoxFromXYZ(const std::string &trajectory_file_name);
+    void readBoxFromFile(const std::string &box_file_name);
     void updateBoxInverse();
     void updateBoxInformation(int frame);
 };
