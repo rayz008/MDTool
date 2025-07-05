@@ -1,0 +1,13 @@
+{
+  "_comment": "Sample configuration file for RDF calculation",
+  "_description": "This file contains all settings needed for radial distribution function analysis",
+  "trajectory_input": "trajectory.xyz",
+  "atom_type_1": "C0",
+  "atom_type_2": "H",
+  "r_min": 0.0,
+  "r_max": 10.0,
+  "bins": 100,
+  "increment": 5,
+  "rdf_output": "oxygen_hydrogen_rdf.dat",
+  "irdf_output": "oxygen_hydrogen_irdf.dat"
+}
