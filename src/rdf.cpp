@@ -1,11 +1,19 @@
-// Radial Distribution Functions
+/**
+ * @file rdf.cpp
+ * @brief Radial Distribution Function calculation implementation
+ * 
+ * This file implements the RDFCalculator class for computing radial distribution
+ * functions (RDFs) and incremental RDFs from molecular dynamics trajectories.
+ * The implementation handles both orthorhombic and triclinic periodic boundary
+ * conditions.
+ */
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <stdexcept>
 #include <math.h>
 #include <algorithm>
-
 #include "settings.h"
 #include "system.h"
 #include "tools.h"
@@ -15,14 +23,14 @@
 constexpr double PI = 3.141592653589793238L;
 
 void RDFCalculator::initializeVectors(const Settings& settings) {
-    // Calculate bin width
+    // calculate bin width
     dr_ = (settings.r_max - settings.r_min) / settings.bins;
 
-    // Initialize RDF vector
+    // initialize RDF vector
     g_.clear();
     g_.resize(settings.bins, 0.0);
 
-    // Initialize incremental RDF vectors if needed
+    // initialize iRDF vectors if needed
     if (settings.increments > 0) {
         incre_g_.clear();
         incre_g_.resize(settings.bins * settings.increments, 0.0);
@@ -30,19 +38,20 @@ void RDFCalculator::initializeVectors(const Settings& settings) {
         minAB_.clear();
         minAB_.resize(settings.increments, 0.0);
     } else {
-        // Clear these vectors if increments is 0
         incre_g_.clear();
         minAB_.clear();
     }
 }
 
 void RDFCalculator::compute(System& sys, const Settings& settings) {
+    // initialize vectors from settings
     initializeVectors(settings);
     num_A_ = 0;
     num_B_ = 0;
     pairs_ = generatePairs(sys, settings.atomA, settings.atomB, num_A_, num_B_);
     factor_ = num_A_ * num_B_ * 4 * PI * dr_;
 
+    // calculate rdf and irdf
     for (int frame = 0; frame < sys.nframes; frame++) {
         sys.updateBoxInformation(frame);
         calculateRDF(sys, settings, frame);
@@ -52,12 +61,14 @@ void RDFCalculator::compute(System& sys, const Settings& settings) {
         }
     }
 
+    // normalize rdf and irdf vectors
     normalizeRDF(settings, sys.nframes);
     if (settings.increments > 0) {
         normalizeIncrementalRDF(settings, sys.nframes);
     }
     //smoothRDF(settings);
 
+    // write rdf and irdf outputs
     writeRDFOutput(settings);
     if (!settings.irdf_outfile.empty() && settings.increments > 0) {
         writeIncrementalRDFOutput(settings);
@@ -80,7 +91,7 @@ void RDFCalculator::calculateRDF(System& sys, const Settings& settings, int fram
         if(dAB < settings.r_max && dAB >= settings.r_min) {
             int layer = static_cast<int>((dAB - settings.r_min) / dr_);
             if (layer >= 0 && layer < settings.bins) {
-                std::cout << sys.box_volume << std::endl;
+                //std::cout << sys.box_volume << std::endl;
                 g_[layer] += sys.box_volume; 
             }
         }
@@ -100,14 +111,14 @@ void RDFCalculator::calculateIncrementalRDF(System& sys, const Settings& setting
         double dz = sys.coords[frame*sys.natoms * 3 + pair.first * 3 + 2]
                   - sys.coords[frame*sys.natoms * 3 + pair.second * 3 + 2];
 
-        pbcTriclinic(dx, dy, dz, sys); // TODO: add usage for pbcOrth
+        pbcTriclinic(dx, dy, dz, sys);
 
         double dAB = sqrt(dx * dx + dy * dy + dz * dz);
 
         if (check == pair.first) {
             refreshMinAB(settings, dAB, count);
         } else {
-            // if changed atom1, load sorted minAB array to incre_g
+            // if changed atomA index, load sorted minAB array to incre_g
             std::sort(minAB_.begin(), minAB_.end());
             for(int i = 0; i < settings.increments; i++) {
                 int layer = static_cast<int>((minAB_[i] -settings.r_min) / dr_);

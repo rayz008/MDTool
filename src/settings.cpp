@@ -1,16 +1,18 @@
+/**
+ * @file settings.cpp
+ * @brief Reading JSON inputs for processing MD trajectories
+ *
+ * Reading JSON setting parameters for post-processing of MD trajectories.
+ * Only RDF and incrementalRDF analysis implemented currently.
+ *
+ */
+
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
-
 #include "json.hpp"
-#include "settings.h"
-
 using json = nlohmann::json;
-
-/**
- * Settings handles parsing of JSON configuration files 
- *
- */
+#include "settings.h"
 
 Settings::Settings(const char* settingfile) {
     readSettings(settingfile);
@@ -34,12 +36,13 @@ void Settings::readSettings(const char* settingfile) {
 
     try {
         std::cout << "Parsing Settings file ..."<< std::endl;
-        // Required configuration fields
+        
+        // required configuration fields
         traj_infile = settingconfig.at("trajectory_input").get<std::string>();
         atomA = settingconfig.at("atom_type_1").get<std::string>();
         atomB = settingconfig.at("atom_type_2").get<std::string>();
 
-        // Optional configuration fields
+        // optional configuration fields
         box_infile = settingconfig.value("box_input", std::string(""));
         rdf_outfile = settingconfig.value("rdf_output", std::string("rdf.dat"));
         r_min = settingconfig.value("r_min", 0.0);
@@ -48,6 +51,7 @@ void Settings::readSettings(const char* settingfile) {
         increments = settingconfig.value("increment", 0);
         irdf_outfile = settingconfig.value("irdf_output", std::string("irdf.dat"));
 
+        // verify setting parameters
         validateSettings();
 
         std::cout << "Settings file parsed successfully!" << std::endl;

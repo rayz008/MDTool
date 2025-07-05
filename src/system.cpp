@@ -1,3 +1,11 @@
+/**
+ * @file system.cpp
+ * @brief System constructed from trajectory and box information
+ * 
+ * Atomic system built from MD trajectory information files.
+ * Currently only reads xyz trajectory.
+ */
+
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -6,7 +14,6 @@
 #include <math.h>
 #include <thread>
 #include <algorithm>
-
 #include "system.h"
 
 System::~System() {
@@ -21,7 +28,8 @@ void System::allocateTrajectoryMemory() {
         delete[] coords;
     }
 
-    atoms  = new std::string[natoms]; // TODO: assumes each frame contains same atoms in same sequence, add a check
+    // TODO: assumes each frame contains same atoms in same sequence
+    atoms  = new std::string[natoms]; 
     coords = new double[nframes * natoms * 3];
 
     traj_allocated = true;
@@ -108,7 +116,7 @@ void System::readXYZ(const std::string &trajectory_file_name) {
 void System::readBox(const Settings& settings) {
     bool box_read = false;
     
-    // Method 1: Try to read from separate box file if specified
+    // read from separate box file if specified
     if (!settings.box_infile.empty()) {
         try {
             std::cout << "Attempting to read box from file: " << settings.box_infile << std::endl;
@@ -121,7 +129,7 @@ void System::readBox(const Settings& settings) {
         }
     }
     
-    // Method 2: Try to read from XYZ trajectory file if no separate box file worked
+    // read from XYZ trajectory file if no separate box file specified
     if (!box_read) {
         try {
             std::cout << "Attempting to read box from XYZ file: " << settings.traj_infile << std::endl;
@@ -133,7 +141,6 @@ void System::readBox(const Settings& settings) {
         }
     }
     
-    // Method 3: Use default box if both methods failed
     if (!box_read) {
         std::cerr << "No box information found. Please verify box information in trajectory or in box file" << std::endl;
     }

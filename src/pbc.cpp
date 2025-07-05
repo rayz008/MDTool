@@ -1,14 +1,11 @@
+/**
+ * @file pbc.cpp
+ * @brief Minimum image conversion to distance vectors based on periodic 
+ * boundary conditions given orthorhombic or triclinic boxes.
+ */
+
 #include <math.h>
 #include "system.h"
-
-/**
- * Functions to apply minimum image convention to distance vectors
- *
- * dx     : x distance vector
- * dy     : y distance vector
- * dz     : z distance vector
- * system : System containing atomic coordinates and box information
- */
 
 void pbcOrthorhombic(double& dx, double& dy, double& dz, System& sys) {
     dx -= rint(dx / sys.box_matrix[0]) * sys.box_matrix[0];

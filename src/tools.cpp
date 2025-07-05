@@ -1,3 +1,8 @@
+/**
+ * @file tools.cpp
+ * @brief Mathematic tools function, currently implemented smoothing function
+ */
+#include <fstream>
 #include <vector>
 #include <cmath>
 #include <stdexcept>
@@ -9,7 +14,6 @@
 std::vector<double> savitzkyGolay(const std::vector<double>& y,
                                   int window_size, int order,
                                   int deriv, double rate) {
-    // Input validation
     if (window_size <= 0 || window_size % 2 == 0) {
         throw std::invalid_argument("window_size must be a positive odd number");
     }
@@ -28,7 +32,7 @@ std::vector<double> savitzkyGolay(const std::vector<double>& y,
 
     int half_window = (window_size - 1) / 2;
 
-    // Build Vandermonde matrix B
+    // build Vandermonde matrix B
     // B[i][j] = k^j where k = i - half_window
     Eigen::MatrixXd B(window_size, order + 1);
     for (int i = 0; i < window_size; ++i) {
@@ -38,19 +42,18 @@ std::vector<double> savitzkyGolay(const std::vector<double>& y,
         }
     }
 
-    // Compute pseudoinverse and extract the derivative row
+    // pseudoinverse and extract the derivative row
     Eigen::MatrixXd B_pinv = B.completeOrthogonalDecomposition().pseudoInverse();
     Eigen::VectorXd coeffs = B_pinv.row(deriv);
 
-    // Apply derivative and rate scaling
+    // derivative and rate scaling
     double deriv_factor = std::pow(rate, deriv) * factorial(deriv);
     coeffs *= deriv_factor;
 
-    // Pad the signal at the extremes (matching Python implementation exactly)
+    // padding at extremes
     std::vector<double> y_padded;
     y_padded.reserve(y.size() + 2 * half_window);
 
-    // First padding: firstvals = y[0] - abs(y[1:half_window+1][::-1] - y[0])
     for (int i = half_window; i >= 1; --i) {
         if (i < static_cast<int>(y.size())) {
             double val = y[0] - std::abs(y[i] - y[0]);
@@ -60,10 +63,9 @@ std::vector<double> savitzkyGolay(const std::vector<double>& y,
         }
     }
 
-    // Original data
     y_padded.insert(y_padded.end(), y.begin(), y.end());
 
-    // Last padding: lastvals = y[-1] + abs(y[-half_window-1:-1][::-1] - y[-1])
+    // padding: lastvals = y[-1] + abs(y[-half_window-1:-1][::-1] - y[-1])
     size_t n = y.size();
     for (int i = 1; i <= half_window; ++i) {
         if (i < static_cast<int>(n)) {
@@ -74,14 +76,13 @@ std::vector<double> savitzkyGolay(const std::vector<double>& y,
         }
     }
 
-    // Apply convolution (equivalent to np.convolve(m[::-1], y, mode='valid'))
+    // convolution
     std::vector<double> result;
     result.reserve(y.size());
 
     for (size_t i = half_window; i < y_padded.size() - half_window; ++i) {
         double sum = 0.0;
         for (int j = 0; j < window_size; ++j) {
-            // Reverse the coefficients (m[::-1] in Python)
             sum += coeffs[window_size - 1 - j] * y_padded[i - half_window + j];
         }
         result.push_back(sum);
@@ -90,13 +91,11 @@ std::vector<double> savitzkyGolay(const std::vector<double>& y,
     return result;
 }
 
-// Simple factorial function (already in your code, but included for completeness)
 int factorial(int n) {
     if (n <= 1) return 1;
     return n * factorial(n - 1);
 }
 
-// Convenience function for just smoothing (deriv=0, rate=1)
 std::vector<double> smoothData(const std::vector<double>& data,
                                int window_size, int order) {
     return savitzkyGolay(data, window_size, order, 0, 1.0);

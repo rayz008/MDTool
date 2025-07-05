@@ -1,9 +1,11 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
-
-#include <vector>
 #include <string>
 
+/**
+ * @struct Settings
+ * @brief Processes parameters used for MD trajectory analysis from JSON input
+ */
 struct Settings {
     // files
     std::string traj_infile;
@@ -13,11 +15,18 @@ struct Settings {
     // atoms
     std::string atomA;
     std::string atomB;
-    // parameters
+    // parameters for rdf and i-rdf
     double r_min, r_max;
     int bins, increments;
 
+    /**
+     * @brief Reads setting information from JSON file
+     */
     void readSettings(const char* filename);
+
+    /**
+     * @brief Validates setting parameters
+     */
     void validateSettings() const;
 
     Settings(const char* filename);
