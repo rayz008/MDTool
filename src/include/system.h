@@ -31,6 +31,7 @@ struct System {
     void allocateTrajectoryMemory();
     void allocateBoxMemory();
     void readXYZ(const std::string &filename);
+    void readBox(const Settings& settings);
     void readBoxFromXYZ(const std::string &trajectory_file_name);
     void readBoxFromFile(const std::string &box_file_name);
     void updateBoxInverse();

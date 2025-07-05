@@ -63,6 +63,8 @@ void System::readXYZ(const std::string &trajectory_file_name) {
         throw std::runtime_error("Cannot open trajectory file, please check if it exists.");
     }
 
+    std::cout << "Parsing trajectory file: " + trajectory_file_name << std::endl;
+
     // set natoms and nframes
     std::string line;
     std::istringstream iss;
@@ -98,7 +100,45 @@ void System::readXYZ(const std::string &trajectory_file_name) {
     }
 
     file.close();
+    
+    std::cout << "Trajectory file parsed successfully!" << std::endl;
 
+}
+
+void System::readBox(const Settings& settings) {
+    bool box_read = false;
+    
+    // Method 1: Try to read from separate box file if specified
+    if (!settings.box_infile.empty()) {
+        try {
+            std::cout << "Attempting to read box from file: " << settings.box_infile << std::endl;
+            readBoxFromFile(settings.box_infile);
+            box_read = true;
+            std::cout << "Successfully read box information from separate file." << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Failed to read box from file '" << settings.box_infile 
+                      << "': " << e.what() << std::endl;
+        }
+    }
+    
+    // Method 2: Try to read from XYZ trajectory file if no separate box file worked
+    if (!box_read) {
+        try {
+            std::cout << "Attempting to read box from XYZ file: " << settings.traj_infile << std::endl;
+            readBoxFromXYZ(settings.traj_infile);
+            box_read = true;
+            std::cout << "Successfully read box information from XYZ file." << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Failed to read box from XYZ file: " << e.what() << std::endl;
+        }
+    }
+    
+    // Method 3: Use default box if both methods failed
+    if (!box_read) {
+        std::cerr << "No box information found. Please verify box information in trajectory or in box file" << std::endl;
+    }
+    
+    std::cout << "Box setup complete!" << std::endl;
 }
 
 void System::readBoxFromXYZ(const std::string &trajectory_file_name) {

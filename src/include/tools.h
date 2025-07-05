@@ -5,8 +5,13 @@
 #include <string>
 #include "system.h"
 
-std::vector<std::pair<int, int>> countPairs(
-    const System& sys, const std::string &atomA, const std::string &atomB,
-    int &numA, int &numB);
+std::vector<double> savitzkyGolay(const std::vector<double>& y,
+                                  int window_size, int order,
+                                  int deriv, double rate);
+
+int factorial(int n);
+
+std::vector<double> smoothData(const std::vector<double>& data,
+                               int window_size, int order);
 
 #endif

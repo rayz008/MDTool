@@ -1,5 +1,6 @@
 #include <fstream>
 #include <stdexcept>
+#include <iostream>
 
 #include "json.hpp"
 #include "settings.h"
@@ -32,21 +33,24 @@ void Settings::readSettings(const char* settingfile) {
     file.close();
 
     try {
+        std::cout << "Parsing Settings file ..."<< std::endl;
         // Required configuration fields
         traj_infile = settingconfig.at("trajectory_input").get<std::string>();
-        atom1 = settingconfig.at("atom_type_1").get<std::string>();
-        atom2 = settingconfig.at("atom_type_2").get<std::string>();
+        atomA = settingconfig.at("atom_type_1").get<std::string>();
+        atomB = settingconfig.at("atom_type_2").get<std::string>();
 
         // Optional configuration fields
         box_infile = settingconfig.value("box_input", std::string(""));
-        rdf_outfile = settingconfig.value("rdf_output", std::string("radial.dat"));
+        rdf_outfile = settingconfig.value("rdf_output", std::string("rdf.dat"));
         r_min = settingconfig.value("r_min", 0.0);
         r_max = settingconfig.value("r_max", 10.0);
         bins = settingconfig.value("bins", 200);
         increments = settingconfig.value("increment", 0);
-        irdf_outfile = settingconfig.value("irdf_output", std::string(""));
+        irdf_outfile = settingconfig.value("irdf_output", std::string("irdf.dat"));
 
         validateSettings();
+
+        std::cout << "Settings file parsed successfully!" << std::endl;
 
     } catch (const json::out_of_range& e) {
         throw std::runtime_error("Missing required configuration: " + std::string(e.what()));
@@ -68,7 +72,7 @@ void Settings::validateSettings() const {
     if (traj_infile.empty()) {
         throw std::runtime_error("Trajectory input file need to be specified");
     }
-    if (atom1.empty() || atom2.empty()) {
+    if (atomA.empty() || atomB.empty()) {
         throw std::runtime_error("Both atom types should be specified");
     }
 }

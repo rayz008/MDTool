@@ -11,8 +11,8 @@ struct Settings {
     std::string rdf_outfile;
     std::string irdf_outfile;
     // atoms
-    std::string atom1;
-    std::string atom2;
+    std::string atomA;
+    std::string atomB;
     // parameters
     double r_min, r_max;
     int bins, increments;
