@@ -12,7 +12,6 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
-#include <thread>
 #include <algorithm>
 #include "system.h"
 
@@ -83,7 +82,7 @@ void System::readXYZ(const std::string &trajectory_file_name) {
     iss >> natoms;
 
     nframes++;
-    while(getline(file, line)) {
+    while(std::getline(file, line)) {
         nframes++;
     }
     nframes /= (natoms + 2);
@@ -94,16 +93,34 @@ void System::readXYZ(const std::string &trajectory_file_name) {
 
     // set atoms and coords
     for (int i = 0; i < nframes; i++) {
-        getline(file, line);
-        getline(file, line);
+        std::getline(file, line);
+        std::getline(file, line);
+
         for (int j = 0; j < natoms; j++) {
-            getline(file, line);
-            iss.clear();
-            iss.str(line);
-            iss >> atoms[j]
-                >> coords[i * natoms * 3 + j * 3]
-                >> coords[i * natoms * 3 + j * 3 + 1]
-                >> coords[i * natoms * 3 + j * 3 + 2];
+            std::istringstream tempiss;
+            std::string dummy_atom;
+            tempiss.clear();
+
+            std::getline(file, line);
+            tempiss.str(line);
+
+            if (i == 0) {
+                tempiss >> atoms[j];
+            } else {
+                tempiss >> dummy_atom;
+            }
+            
+            tempiss.clear();
+            tempiss.str(line);
+            tempiss >> dummy_atom
+                    >> coords[i * natoms * 3 + j * 3]
+                    >> coords[i * natoms * 3 + j * 3 + 1]
+                    >> coords[i * natoms * 3 + j * 3 + 2];
+
+            if (dummy_atom != atoms[j] && i != 0) {
+                std::cerr << "atomname" << dummy_atom << "  atoms[j]" << atoms[j] << std::endl;
+                std::cerr << "Frame " << i << " has different atom name at index " << j << std::endl;
+            }
         }
     }
 
